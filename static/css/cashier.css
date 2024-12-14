@@ -1,0 +1,160 @@
+/* Estilos generales para la vista de cashier */
+.cashier-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+    color: #e0e0e0; /* Texto claro */
+}
+
+.header h2, .header h3 {
+    text-align: center;
+    color: #ffffff; /* Blanco */
+}
+
+.columns {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    max-width: 1200px;
+    gap: 20px; /* Separación entre columnas */
+}
+
+.column {
+    width: 30%;
+    padding: 20px;
+    background-color: #2f3136; /* Fondo oscuro */
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    color: #b9bbbe; /* Texto claro */
+}
+
+h4 {
+    margin-bottom: 15px;
+    font-weight: bold;
+    color: #ffffff; /* Blanco */
+}
+
+/* Estilo para los inputs */
+.form-control {
+    margin-bottom: 10px;
+    padding: 10px;
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #40444b;
+    background-color: #2f3136;
+    color: #ffffff;
+    border-radius: 8px;
+    transition: border-color 0.3s;
+}
+
+.form-control:focus {
+    border-color: #5865f2;
+}
+
+/* Botones y grupos de opciones */
+.option-group {
+    margin-bottom: 15px;
+}
+
+.option-group label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    display: block;
+    color: #ffffff;
+}
+
+.btn-group .btn {
+    margin: 5px;
+    padding: 8px 12px;
+    font-size: 0.9em;
+    background-color: #5865f2;
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.btn-group .btn:hover {
+    background-color: #4752c4;
+    transform: scale(1.05);
+}
+
+/* Botón activo */
+.btn-group .btn.active {
+    background-color: #7289da; /* Azul activo */
+    color: #ffffff;
+    border: 2px solid #40444b;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.7);
+}
+
+/* Tabla del carrito */
+#cart-items td, #cart-items th {
+    padding: 10px;
+    text-align: center;
+    border: 1px solid #40444b;
+}
+
+#cart-items th {
+    background-color: #36393f;
+    color: #ffffff;
+}
+
+#cart-items td {
+    background-color: #2f3136;
+    color: #b9bbbe;
+}
+
+#total-price {
+    font-weight: bold;
+    font-size: 1.2em;
+    color: #ffffff;
+}
+
+/* Elementos de la lista de productos */
+.product-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #40444b;
+    background-color: #2f3136;
+    color: #ffffff;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.product-item:hover {
+    background-color: #3b3e45; /* Hover más claro */
+}
+
+.product-name {
+    flex-grow: 1;
+}
+
+.add-button {
+    background-color: #3ba55d; /* Verde moderno */
+    color: #ffffff;
+    border: none;
+    padding: 5px 10px;
+    font-size: 1em;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.add-button:hover {
+    background-color: #2e8b57;
+    transform: scale(1.05);
+}
+
+/* Estilo para el texto de vuelta */
+#vuelto {
+    color: #b9bbbe;
+    background-color: #2f3136;
+    border: 1px solid #40444b;
+    padding: 10px;
+    border-radius: 8px;
+    text-align: center;
+}

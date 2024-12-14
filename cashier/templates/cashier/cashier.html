@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'css/cashier.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="cashier-container">
+    <div class="header">
+        <h2>Bienvenido, {{ user.username }}</h2>
+        <h3>Selecciona productos para la venta</h3>
+    </div>
+
+    <div class="columns">
+        <!-- Columna de búsqueda de productos -->
+        <div class="column search-products">
+            <h4>Buscar productos</h4>
+            <form id="product-search-form">
+                <input type="text" id="product-search-input" placeholder="Buscar productos por nombre o código de barras" class="form-control">
+                <button type="button" id="product-search-button" class="btn btn-primary">Buscar</button>
+            </form>
+            <ul id="product-search-results" class="list-unstyled mt-3"></ul>
+        </div>
+
+        <!-- Columna de carrito de compras -->
+        <div class="column shopping-cart">
+            <h4>Carrito de Compras</h4>
+            <input type="text" id="barcode-input" placeholder="Código de barras" class="form-control mb-2">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Cant.</th>
+                        <th>Producto</th>
+                        <th>Total</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody id="cart-items">
+                    <tr>
+                        <td colspan="4" class="text-center">No hay productos en el carrito.</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p class="lead">Total: $<span id="total-price">0.00</span></p>
+        </div>
+
+        <!-- Columna de opciones de pago -->
+        <div class="column payment-options">
+            <h4>Opciones de Pago</h4>
+            <div class="option-group">
+                <label>Tipo de Venta</label>
+                <div class="btn-group" role="group" aria-label="Tipo de Venta">
+                    <button type="button" class="btn btn-outline-primary" id="boleta">Boleta Electrónica</button>
+                    <button type="button" class="btn btn-outline-primary" id="factura">Factura Electrónica</button>
+                </div>
+            </div>
+
+            <div class="option-group">
+                <label>Forma de Pago</label>
+                <div class="btn-group" role="group" aria-label="Forma de Pago">
+                    <button type="button" class="btn btn-outline-primary" id="efectivo">Efectivo</button>
+                    <button type="button" class="btn btn-outline-primary" id="debito">Tarjeta de Débito</button>
+                    <button type="button" class="btn btn-outline-primary" id="credito">Tarjeta de Crédito</button>
+                </div>
+            </div>
+
+            <label for="correo_cliente">Correo del Cliente (opcional):</label>
+            <input type="email" id="correo_cliente" name="correo_cliente" class="form-control mb-2" placeholder="ejemplo@correo.com">
+
+            <label for="cantidad_pagada">Cliente Paga:</label>
+            <input type="number" id="cantidad_pagada" name="cantidad_pagada" class="form-control mb-2" placeholder="Ingrese el monto pagado">
+
+            <label>Vuelto:</label>
+            <span id="vuelto" class="form-control mb-2">$0.00</span>
+
+            <button type="button" id="confirmar-compra" class="btn btn-primary btn-block">Confirmar Compra</button>
+        </div>
+    </div>
+</div>
+<a href="{% url 'admin_dashboard' %}" class="btn btn-secondary">Volver</a>
+<script src="{% static 'js/cashier.js' %}"></script>
+{% endblock %}

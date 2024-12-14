@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2>Apertura Caja</h2>
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <br>
+        <br>
+        <button type="submit" class="btn btn-primary">Abrir Caja</button>
+    </form>
+</div>
+<div>
+    <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary">Volver</a>
+</div>
+{% endblock %}  

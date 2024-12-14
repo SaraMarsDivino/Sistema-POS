@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2>{{ title }}</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-success" name="save_only">Guardar</button>
+        <button type="submit" class="btn btn-primary" name="save_and_list">Guardar y Volver a la Lista</button>
+        
+        <a href="{% url 'product_management' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

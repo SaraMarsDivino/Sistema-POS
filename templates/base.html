@@ -1,0 +1,29 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}MOVOS{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    {% block extra_styles %}{% endblock %}
+</head>
+
+<body>
+    <header class="main-header">
+        <h1>MOV-OS</h1>
+        <nav>
+            <ul>
+                <li>Bienvenido a MOV-OS</li>
+            </ul>
+        </nav>
+    </header>
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+    <footer class="main-footer">
+        <p>&copy; 2024 MOV-OS. Todos los derechos reservados.</p>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,229 @@
+/* Global Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Roboto', sans-serif; /* Tipografía moderna similar */
+    background-color: #181a1b; /* Fondo oscuro */
+    color: #e0e0e0; /* Texto claro */
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    margin: 0;
+}
+
+/* Content Container */
+.container {
+    flex: 1;
+    max-width: 1200px;
+    margin: auto;
+    padding: 20px;
+    background-color: #202225; /* Fondo ligeramente más claro para contraste */
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); /* Sombra elegante */
+}
+
+/* Header Styling */
+.main-header {
+    background-color: #2f3136; /* Fondo oscuro para el header */
+    color: #ffffff;
+    padding: 15px;
+    text-align: center;
+    font-size: 24px;
+}
+
+.main-header h1 {
+    font-size: 32px;
+    font-weight: bold;
+}
+
+.main-header nav ul {
+    list-style-type: none;
+    display: flex;
+    justify-content: center;
+    padding: 10px 0;
+}
+
+.main-header nav ul li {
+    margin: 0 10px;
+    color: #7289da; /* Azul suave */
+    font-size: 18px;
+    cursor: pointer;
+}
+
+.main-header nav ul li:hover {
+    color: #ffffff; /* Blanco al pasar el ratón */
+}
+
+/* Button Styling */
+button, .btn {
+    background-color: #5865f2; /* Azul primario */
+    color: #ffffff;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+button:hover, .btn:hover {
+    background-color: #4752c4;
+    transform: scale(1.05); /* Efecto de crecimiento al pasar el ratón */
+}
+
+/* Card Styling */
+.card {
+    background-color: #2f3136; /* Fondo del card */
+    border: 1px solid #40444b; /* Borde sutil */
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    margin: 15px;
+    text-align: center;
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-5px); /* Efecto flotante */
+}
+
+.card h3 {
+    font-size: 20px;
+    color: #ffffff;
+}
+
+.card p {
+    color: #b9bbbe;
+}
+
+/* Footer Styling */
+footer, .main-footer {
+    background-color: #202225;
+    color: #b9bbbe;
+    text-align: center;
+    padding: 15px 0;
+    font-size: 14px;
+    margin-top: 20px;
+    flex-shrink: 0;
+    width: 100%;
+    border-top: 1px solid #40444b; /* Línea sutil */
+}
+
+/* Table Styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: #2f3136;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+table th, table td {
+    border: 1px solid #40444b;
+    padding: 12px;
+    text-align: left;
+}
+
+th {
+    background-color: #36393f;
+    color: #ffffff;
+}
+
+td {
+    background-color: #2f3136;
+    color: #b9bbbe;
+}
+
+/* Form Styling */
+form {
+    margin-top: 20px;
+}
+
+form .form-group {
+    margin-bottom: 15px;
+}
+
+form label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #ffffff;
+}
+
+form input[type="text"], form input[type="email"], form input[type="password"], form input[type="number"], form select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #40444b;
+    background-color: #2f3136;
+    color: #ffffff;
+    border-radius: 8px;
+    transition: border-color 0.3s;
+}
+
+form input:focus {
+    border-color: #5865f2; /* Azul primario al enfoque */
+}
+
+/* Links Styling */
+a {
+    color: #7289da;
+    text-decoration: none;
+}
+
+a:hover {
+    color: #ffffff;
+    text-decoration: underline;
+}
+
+/* Utility Classes */
+.mt-4 { margin-top: 1rem; }
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+
+/* Paginación */
+.pagination {
+    display: flex;
+    justify-content: center;
+    list-style-type: none;
+    padding: 0;
+    margin: 20px 0;
+}
+
+.pagination li {
+    margin: 0 5px;
+}
+
+.pagination a {
+    display: block;
+    padding: 10px 15px;
+    border-radius: 5px;
+    color: #ffffff;
+    background-color: #5865f2;
+    text-decoration: none;
+    transition: background-color 0.3s;
+}
+
+.pagination a:hover {
+    background-color: #4752c4;
+}
+
+/* Responsive Adjustments */
+@media screen and (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+
+    .main-header h1 {
+        font-size: 24px;
+    }
+
+    button, .btn {
+        font-size: 14px;
+        padding: 8px 16px;
+    }
+}
