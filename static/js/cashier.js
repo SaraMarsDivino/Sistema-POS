@@ -32,6 +32,24 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+
+    document.getElementById('cerrar-caja-btn').addEventListener('click', () => {
+        $('#cierreCajaModal').modal('show');
+    });
+
+    document.getElementById('confirmar-cierre-caja').addEventListener('click', () => {
+        fetch("{% url 'cerrar_caja' %}", { method: 'POST', headers: { 'X-CSRFToken': '{{ csrf_token }}' } })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.mensaje);
+                    window.location.reload();
+                } else {
+                    alert("Error al cerrar la caja.");
+                }
+            });
+    });
+
     // Calcular el vuelto
     cantidadPagadaInput.addEventListener("input", () => calcularVuelto());
 
@@ -233,6 +251,81 @@ document.addEventListener("DOMContentLoaded", () => {
         const cookies = document.cookie.split(";");
         for (let cookie of cookies) {
             const [name, value] = cookie.trim().split("=");
+            if (name === "csrftoken") return value;
+        }
+        return null;
+    }
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+    const cerrarCajaBtn = document.getElementById("cerrar-caja-btn");
+    const confirmarCierreCajaBtn = document.getElementById("confirmar-cierre-caja");
+
+    // Mostrar modal al hacer clic en "Cerrar Caja"
+    cerrarCajaBtn.addEventListener("click", () => {
+        const cierreCajaModal = new bootstrap.Modal(document.getElementById("cierreCajaModal"));
+        cierreCajaModal.show();
+    });
+
+    // Confirmar cierre de caja
+    confirmarCierreCajaBtn.addEventListener("click", async () => {
+        try {
+            const response = await fetch("{% url 'cerrar_caja' %}", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": getCSRFToken(),
+                    "Content-Type": "application/json"
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success) {
+                    showToast(data.mensaje || "Caja cerrada con éxito.");
+                    setTimeout(() => {
+                        window.location.href = "{% url 'cashier_dashboard' %}";
+                    }, 2000);
+                } else {
+                    showToast(data.error || "Error al cerrar la caja.", "danger");
+                }
+            } else {
+                showToast("Error al cerrar la caja. Verifica los permisos.", "danger");
+            }
+        } catch (error) {
+            console.error("Error al cerrar caja:", error);
+            showToast("Ocurrió un error al cerrar la caja.", "danger");
+        }
+    });
+
+    // Mostrar notificaciones con Toast
+    function showToast(message, type = "success") {
+        const toastContainer = document.getElementById("toast-container") || createToastContainer();
+        const toast = document.createElement("div");
+        toast.className = `toast align-items-center text-bg-${type} border-0 show`;
+        toast.role = "alert";
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">${message}</div>
+                <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        `;
+        toastContainer.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+
+    function createToastContainer() {
+        const container = document.createElement("div");
+        container.id = "toast-container";
+        container.className = "toast-container position-fixed bottom-0 end-0 p-3";
+        document.body.appendChild(container);
+        return container;
+    }
+
+    // Obtener token CSRF
+    function getCSRFToken() {
+        const cookies = document.cookie.split("; ");
+        for (let cookie of cookies) {
+            const [name, value] = cookie.split("=");
             if (name === "csrftoken") return value;
         }
         return null;

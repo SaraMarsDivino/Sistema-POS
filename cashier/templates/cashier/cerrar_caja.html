@@ -3,11 +3,14 @@
 {% block content %}
 <div class="container">
     <h2>Cerrar Caja</h2>
-    <p><strong>Fecha de Apertura:</strong> {{ caja_abierta.fecha_apertura }}</p>
-    <p><strong>Total en Efectivo:</strong> ${{ caja_abierta.total_efectivo }}</p>
-    <p><strong>Total Tarjeta de Crédito:</strong> ${{ caja_abierta.total_tarjeta_credito }}</p>
-    <p><strong>Total Tarjeta de Débito:</strong> ${{ caja_abierta.total_tarjeta_debito }}</p>
-    <p><strong>Total de Ventas:</strong> {{ caja_abierta.total_ventas }}</p>
+    <p><strong>Fecha de Apertura:</strong> {{ caja_abierta.fecha_apertura|date:"d/m/Y, H:i" }}</p>
+    <p><strong>Efectivo Inicial:</strong> ${{ caja_abierta.efectivo_inicial }}</p>
+    <p><strong>Total en Efectivo:</strong> ${{ total_efectivo }}</p>
+    <p><strong>Total Tarjeta de Crédito:</strong> ${{ total_credito }}</p>
+    <p><strong>Total Tarjeta de Débito:</strong> ${{ total_debito }}</p>
+    <p><strong>Total de Ventas:</strong> ${{ total_ventas }}</p>
+    <p><strong>Vuelto Entregado:</strong> ${{ vuelto_entregado }}</p>
+    <p><strong>Efectivo Final en Caja:</strong> ${{ efectivo_final }}</p>
 
     <form method="POST">
         {% csrf_token %}
@@ -15,6 +18,7 @@
     </form>
 </div>
 <div>
-    <a href="{% url 'cashier_dashboard' %}" class="btn btn-secondary">Volver a cajero</a>
+    <a href="{% url 'cashier_dashboard' %}" class="btn btn-secondary mt-3">Volver a cajero</a>
 </div>
 {% endblock %}
+

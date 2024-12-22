@@ -77,7 +77,31 @@
             <button type="button" id="confirmar-compra" class="btn btn-primary btn-block">Confirmar Compra</button>
         </div>
     </div>
+
+    <!-- Botón para cerrar caja -->
+    <div class="text-center mt-4">
+        <button type="button" id="cerrar-caja-btn" class="btn btn-danger">Cerrar Caja</button>
+    </div>
 </div>
-<a href="{% url 'admin_dashboard' %}" class="btn btn-secondary">Volver</a>
+<!-- Modal de confirmación para cerrar caja -->
+<div class="modal fade" id="cierreCajaModal" tabindex="-1" aria-labelledby="cierreCajaModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cierreCajaModalLabel">Confirmar Cierre de Caja</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                ¿Estás seguro de que deseas cerrar la caja? Esta acción no se puede deshacer.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" id="confirmar-cierre-caja" class="btn btn-danger">Cerrar Caja</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <script src="{% static 'js/cashier.js' %}"></script>
 {% endblock %}

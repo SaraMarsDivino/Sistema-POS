@@ -5,13 +5,14 @@
     <h2>Apertura Caja</h2>
     <form method="POST">
         {% csrf_token %}
-        {{ form.as_p }}
-        <br>
-        <br>
+        <div class="form-group">
+            <label for="efectivo_inicial">Efectivo Inicial:</label>
+            <input type="number" class="form-control" id="efectivo_inicial" name="efectivo_inicial" placeholder="Ingrese el monto inicial en caja" required>
+        </div>
         <button type="submit" class="btn btn-primary">Abrir Caja</button>
     </form>
 </div>
 <div>
-    <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary">Volver</a>
+    <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary mt-3">Volver</a>
 </div>
-{% endblock %}  
+{% endblock %}

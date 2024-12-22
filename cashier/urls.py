@@ -1,6 +1,7 @@
 #cashier/views.py
 from django.urls import path
 from . import views
+from cashier.views import reporte_venta
 
 urlpatterns = [
     path('', views.cashier_dashboard, name='cashier_dashboard'),
@@ -11,4 +12,5 @@ urlpatterns = [
     path('agregar-al-carrito/', views.agregar_al_carrito, name='agregar_al_carrito'),
     path('listar-carrito/', views.listar_carrito, name='listar_carrito'),
     path('limpiar-carrito/', views.limpiar_carrito, name='limpiar_carrito'),
+    path('reporte-venta/<int:venta_id>/', reporte_venta, name='reporte_venta'), 
 ]

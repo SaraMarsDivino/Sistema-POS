@@ -18,9 +18,11 @@ class Venta(models.Model):
         choices=[('efectivo', 'Efectivo'), ('debito', 'Tarjeta de Débito'), ('credito', 'Tarjeta de Crédito')],
         default='efectivo'
     )
+    vuelto_entregado = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)  # Nuevo campo
 
     def __str__(self):
         return f"Venta #{self.id} - Total: ${self.total}"
+
 
 class VentaDetalle(models.Model):
     venta = models.ForeignKey(Venta, related_name='detalles', on_delete=models.CASCADE)
@@ -51,7 +53,24 @@ class AperturaCierreCaja(models.Model):
     total_ventas_credito = models.DecimalField(max_digits=10, decimal_places=2, default=0.0, verbose_name="Total Ventas con Tarjeta de Crédito")
     total_ventas_debito = models.DecimalField(max_digits=10, decimal_places=2, default=0.0, verbose_name="Total Ventas con Tarjeta de Débito")
     estado = models.CharField(max_length=10, choices=ESTADO_CAJA, default='abierta', verbose_name="Estado de la Caja")
-
+    ventas_totales = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0.0,
+        verbose_name="Ventas Totales"
+    )
+    vuelto_entregado = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        default=0.0, 
+        verbose_name="Total Vuelto Entregado"
+    )
+    efectivo_final = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0.0,
+        verbose_name="Efectivo Final"
+    )
     class Meta:
         verbose_name = "Apertura y Cierre de Caja"
         verbose_name_plural = "Aperturas y Cierres de Caja"
