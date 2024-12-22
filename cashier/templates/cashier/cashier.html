@@ -83,14 +83,53 @@
         <button type="button" id="close-cash-button" class="btn btn-danger">Cerrar Caja</button>
     </div>
     
-    
-    
-    
     <!-- Botón para volver al panel de administración -->
     <div class="text-center mt-4">
         <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary">Volver</a>
     </div>
 </div>
 
-<script src="{% static 'js/cashier.js' %}"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const closeCashButton = document.getElementById("close-cash-button");
+
+        if (closeCashButton) {
+            closeCashButton.addEventListener("click", async () => {
+                try {
+                    const response = await fetch("/cashier/cerrar_caja/", {
+                        method: "POST",
+                        headers: {
+                            "X-CSRFToken": getCSRFToken(),
+                            "Content-Type": "application/json"
+                        }
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.success) {
+                            alert(data.mensaje || "Caja cerrada con éxito.");
+                            window.location.href = "/cashier/";
+                        } else {
+                            alert(data.error || "Error al cerrar la caja.");
+                        }
+                    } else {
+                        alert("Error al cerrar la caja. Verifica los permisos.");
+                    }
+                } catch (error) {
+                    console.error("Error al cerrar caja:", error);
+                    alert("Ocurrió un error al cerrar la caja.");
+                }
+            });
+        }
+
+        function getCSRFToken() {
+            const cookies = document.cookie.split("; ");
+            for (let cookie of cookies) {
+                const [name, value] = cookie.split("=");
+                if (name === "csrftoken") return value;
+            }
+            return null;
+        }
+    });
+</script>
 {% endblock %}
