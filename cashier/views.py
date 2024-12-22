@@ -131,17 +131,22 @@ def cashier_dashboard(request):
     return JsonResponse({"error": "Método no permitido."}, status=405)
 
 
+
 @login_required
 def cerrar_caja(request):
     caja_abierta = AperturaCierreCaja.objects.filter(usuario=request.user, estado='abierta').first()
     if not caja_abierta:
         return JsonResponse({"error": "No tienes una caja abierta para cerrar."}, status=403)
 
+    if request.method == 'GET':
+        # Si la solicitud es GET, responder con un mensaje informativo
+        return JsonResponse({"mensaje": "Utiliza el método POST para cerrar la caja."}, status=200)
+
     if request.method == 'POST':
         try:
             ventas_del_dia = Venta.objects.filter(empleado=request.user, fecha__gte=caja_abierta.fecha_apertura)
-            
-            # Manejar de forma segura el agregado de sumas
+
+            # Manejar sumas seguras
             total_ventas = ventas_del_dia.aggregate(total=models.Sum('total')).get('total', 0) or 0
             total_efectivo = ventas_del_dia.filter(forma_pago='efectivo').aggregate(total=models.Sum('total')).get('total', 0) or 0
             total_credito = ventas_del_dia.filter(forma_pago='credito').aggregate(total=models.Sum('total')).get('total', 0) or 0
@@ -172,6 +177,8 @@ def cerrar_caja(request):
             return JsonResponse({"error": str(e)}, status=500)
 
     return JsonResponse({"error": "Método no permitido."}, status=405)
+
+
 
 
 @login_required

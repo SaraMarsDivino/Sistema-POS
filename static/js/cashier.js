@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const cerrarCajaBtn = document.getElementById("cerrar-caja-btn");
+    // Elementos principales del DOM
+    const cerrarCajaBtn = document.getElementById("close-cash-button");
     const confirmarCompraButton = document.getElementById("confirmar-compra");
     const cantidadPagadaInput = document.getElementById("cantidad_pagada");
     const vueltoElement = document.getElementById("vuelto");
@@ -11,6 +12,22 @@ document.addEventListener("DOMContentLoaded", () => {
     const resultsList = document.getElementById("product-search-results");
     let carrito = [];
     let totalCarrito = 0;
+
+    // Obtener el token CSRF
+    function getCSRFToken() {
+        const cookies = document.cookie.split("; ");
+        for (let cookie of cookies) {
+            const [name, value] = cookie.split("=");
+            if (name === "csrftoken") return value;
+        }
+        return null;
+    }
+
+    // Mostrar alertas en lugar de Toasts o Modales
+    function showAlert(message, type = "success") {
+        const prefix = type === "success" ? "[Éxito]" : "[Error]";
+        alert(`${prefix} ${message}`);
+    }
 
     // Restaurar selección desde localStorage
     function restoreSelection(buttonGroup, storageKey) {
@@ -31,22 +48,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 button.classList.remove("active");
             }
         });
-    }
-
-    // Mostrar notificaciones con alertas simples (en vez de Toasts o Modales)
-    function showAlert(message, type = "success") {
-        const prefix = type === "success" ? "[Éxito]" : "[Error]";
-        alert(`${prefix} ${message}`);
-    }
-
-    // Obtener el token CSRF
-    function getCSRFToken() {
-        const cookies = document.cookie.split("; ");
-        for (let cookie of cookies) {
-            const [name, value] = cookie.split("=");
-            if (name === "csrftoken") return value;
-        }
-        return null;
     }
 
     // Calcular el vuelto
@@ -224,7 +225,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // Cerrar caja
     if (cerrarCajaBtn) {
         cerrarCajaBtn.addEventListener("click", async () => {
-            console.log("evento detectado");
             try {
                 const response = await fetch("/cashier/cerrar_caja/", {
                     method: "POST",
