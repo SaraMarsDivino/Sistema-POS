@@ -34,68 +34,8 @@ def abrir_caja(request):
 
     return render(request, 'cashier/abrir_caja.html')
 
-@login_required
-def cerrar_caja(request):
-    # Verificar si el usuario tiene una caja abierta
-    caja_abierta = AperturaCierreCaja.objects.filter(usuario=request.user, estado='abierta').first()
-    if not caja_abierta:
-        messages.warning(request, "No tienes una caja abierta para cerrar.")
-        return redirect('cashier_dashboard')
 
-    if request.method == 'POST':
-        # Calcular el total de ventas realizadas
-        ventas_del_dia = Venta.objects.filter(empleado=request.user, fecha__gte=caja_abierta.fecha_apertura)
-        total_ventas = ventas_del_dia.aggregate(total=models.Sum('total'))['total'] or 0
 
-        # Calcular totales por forma de pago
-        total_efectivo = ventas_del_dia.filter(forma_pago='efectivo').aggregate(total=models.Sum('total'))['total'] or 0
-        total_credito = ventas_del_dia.filter(forma_pago='credito').aggregate(total=models.Sum('total'))['total'] or 0
-        total_debito = ventas_del_dia.filter(forma_pago='debito').aggregate(total=models.Sum('total'))['total'] or 0
-
-        # Calcular total del vuelto entregado en ventas en efectivo
-        vuelto_entregado = ventas_del_dia.filter(forma_pago='efectivo').aggregate(
-            total_vuelto=models.Sum('vuelto_entregado')
-        )['total_vuelto'] or 0
-
-        # Calcular efectivo final en caja
-        efectivo_final = caja_abierta.efectivo_inicial + total_efectivo - vuelto_entregado
-
-        # Guardar los datos en la caja abierta y cerrarla
-        caja_abierta.ventas_totales = total_ventas
-        caja_abierta.total_ventas_efectivo = total_efectivo
-        caja_abierta.total_ventas_credito = total_credito
-        caja_abierta.total_ventas_debito = total_debito
-        caja_abierta.vuelto_entregado = vuelto_entregado  # Guardar el vuelto
-        caja_abierta.efectivo_final = efectivo_final
-        caja_abierta.estado = 'cerrada'
-        caja_abierta.fecha_cierre = timezone.now()
-        caja_abierta.save()
-
-        messages.success(request, f"Caja cerrada exitosamente. Total en caja: ${efectivo_final:.2f}.")
-        return redirect('cashier_dashboard')
-    
-    
-
-    # Datos para la vista
-    ventas_del_dia = Venta.objects.filter(empleado=request.user, fecha__gte=caja_abierta.fecha_apertura)
-    total_ventas = ventas_del_dia.aggregate(total=models.Sum('total'))['total'] or 0
-    total_efectivo = ventas_del_dia.filter(forma_pago='efectivo').aggregate(total=models.Sum('total'))['total'] or 0
-    total_credito = ventas_del_dia.filter(forma_pago='credito').aggregate(total=models.Sum('total'))['total'] or 0
-    total_debito = ventas_del_dia.filter(forma_pago='debito').aggregate(total=models.Sum('total'))['total'] or 0
-    vuelto_entregado = ventas_del_dia.filter(forma_pago='efectivo').aggregate(
-        total_vuelto=models.Sum('vuelto_entregado')
-    )['total_vuelto'] or 0
-    efectivo_final = caja_abierta.efectivo_inicial + total_efectivo - vuelto_entregado
-
-    return render(request, 'cashier/cerrar_caja.html', {
-        'caja_abierta': caja_abierta,
-        'total_ventas': total_ventas,
-        'total_efectivo': total_efectivo,
-        'total_credito': total_credito,
-        'total_debito': total_debito,
-        'vuelto_entregado': vuelto_entregado,
-        'efectivo_final': efectivo_final,
-    })
 
 @login_required
 def reporte_venta(request, venta_id):
@@ -115,27 +55,24 @@ def historial_caja(request):
     })
 
 
-@login_required
+@transaction.atomic
 @login_required
 def cashier_dashboard(request):
     # Verificar si el usuario tiene una caja abierta
     caja_abierta = AperturaCierreCaja.objects.filter(usuario=request.user, estado='abierta').first()
 
-    if not caja_abierta and request.method == 'GET':
+    if not caja_abierta:  # Redirigir a la apertura de caja si no hay una caja abierta
         messages.warning(request, "No tienes una caja abierta. Debes abrir una caja para realizar ventas.")
         return redirect('abrir_caja')
 
-    if request.method == 'GET':
+    if request.method == 'GET':  # Mostrar el cashier si hay una caja abierta
         productos = Product.objects.all()
         return render(request, 'cashier/cashier.html', {
             'productos': productos,
             'caja_abierta': caja_abierta
         })
 
-    if request.method == 'POST':
-        if not caja_abierta:
-            return JsonResponse({"error": "Debes abrir una caja para confirmar compras."}, status=403)
-
+    if request.method == 'POST':  # Procesar ventas desde el carrito
         try:
             data = json.loads(request.body)
             carrito = data.get('carrito', [])
@@ -193,6 +130,7 @@ def cashier_dashboard(request):
 
     return JsonResponse({"error": "Método no permitido."}, status=405)
 
+
 @login_required
 def cerrar_caja(request):
     caja_abierta = AperturaCierreCaja.objects.filter(usuario=request.user, estado='abierta').first()
@@ -234,9 +172,6 @@ def cerrar_caja(request):
             return JsonResponse({"error": str(e)}, status=500)
 
     return JsonResponse({"error": "Método no permitido."}, status=405)
-
-
-
 
 
 @login_required
