@@ -15,6 +15,7 @@
     <table class="table">
         <thead>
             <tr>
+                <th>ID Producto</th>
                 <th>Nombre</th>
                 <th>Descripción</th>
                 <th>Cantidad</th>
@@ -27,6 +28,7 @@
         <tbody>
             {% for product in products %}
             <tr>
+                <td>{{ product.producto_id }}</td>
                 <td>{{ product.nombre }}</td>
                 <td>{{ product.descripcion }}</td>
                 <td>{{ product.cantidad }}</td>
@@ -34,7 +36,6 @@
                 <td>{{ product.precio_venta }}</td>
                 <td>{{ product.codigo_barras }}</td>
                 <td>
-                    
                     <a href="{% url 'edit_product' product.id %}" class="btn btn-warning">Editar</a>
                     <form method="post" action="{% url 'delete_product' product.id %}" style="display: inline;">
                         {% csrf_token %}
@@ -44,11 +45,12 @@
             </tr>
             {% empty %}
             <tr>
-                <td colspan="7" class="text-center">No hay productos registrados.</td>
+                <td colspan="8" class="text-center">No hay productos registrados.</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
+    
 
     <!-- Paginación -->
     <nav aria-label="Page navigation">

@@ -222,5 +222,33 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    // Cerrar caja
+    if (cerrarCajaBtn) {
+        cerrarCajaBtn.addEventListener("click", async () => {
+            try {
+                const response = await fetch("/cashier/cerrar_caja/", {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": getCSRFToken(),
+                        "Content-Type": "application/json"
+                    }
+                });
 
-}); 
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success) {
+                        showAlert(data.mensaje || "Caja cerrada con éxito.", "success");
+                        window.location.href = "/cashier/";
+                    } else {
+                        showAlert(data.error || "Error al cerrar la caja.", "error");
+                    }
+                } else {
+                    showAlert("Error al cerrar la caja. Verifica los permisos.", "error");
+                }
+            } catch (error) {
+                console.error("Error al cerrar caja:", error);
+                showAlert("Ocurrió un error al cerrar la caja.", "error");
+            }
+        });
+    }
+});

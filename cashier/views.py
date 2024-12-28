@@ -181,6 +181,7 @@ def cerrar_caja(request):
 
 
 
+
 @login_required
 def finalizar_venta(request, venta_id):
     venta = get_object_or_404(Venta, id=venta_id)

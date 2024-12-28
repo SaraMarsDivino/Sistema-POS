@@ -9,13 +9,12 @@ from django.http import HttpResponse
 from openpyxl import Workbook, load_workbook
 from .models import Product
 
+# products/views.py
 def product_management(request):
-    # Filtro de búsqueda por nombre
     query = request.GET.get('search', '')
-    products = Product.objects.filter(Q(nombre__icontains=query))
+    products = Product.objects.filter(Q(nombre__icontains=query) | Q(producto_id__icontains=query))
 
-    # Paginación
-    paginator = Paginator(products, 10)  # 10 productos por página
+    paginator = Paginator(products, 10)  # Paginación
     page = request.GET.get('page')
     products_page = paginator.get_page(page)
 
@@ -26,9 +25,11 @@ def product_management(request):
 
 
 
+
+from django.contrib import messages
+
 def upload_products(request):
     if request.method == 'POST':
-        # Verificar si el archivo fue subido
         if 'file' not in request.FILES:
             messages.error(request, 'No se subió ningún archivo.')
             return redirect('upload_products')
@@ -38,30 +39,53 @@ def upload_products(request):
             messages.error(request, 'Por favor sube un archivo válido en formato Excel (.xlsx).')
             return redirect('upload_products')
 
-        # Procesar el archivo Excel
         try:
             workbook = load_workbook(file)
             sheet = workbook.active
 
             for row in sheet.iter_rows(min_row=2, values_only=True):
-                if row[0]:  # Comprobar que la primera columna tenga datos
+                if row[1]:  # Validar que haya datos en el nombre
+                    producto_id = row[0]
+                    nombre = row[1]
+                    descripcion = row[2]
+                    cantidad = row[3] or 0
+                    precio_compra = row[4] or 0.00
+                    precio_venta = row[5] or 0.00
+                    codigo_barras = row[6]
+
+                    # Generar producto_id si no está definido
+                    if not producto_id:
+                        producto_id = f"PRD-{Product.objects.count() + 1}"
+
+                    # Asegurar unicidad del producto_id
+                    original_id = producto_id
+                    counter = 2
+                    while Product.objects.filter(producto_id=producto_id).exists():
+                        producto_id = f"{original_id} ({counter})"
+                        counter += 1
+
                     Product.objects.update_or_create(
-                        nombre=row[0],
+                        producto_id=producto_id,
                         defaults={
-                            'descripcion': row[1],
-                            'cantidad': row[2],
-                            'precio_compra': row[3],
-                            'precio_venta': row[4],
-                            'codigo_barras': row[5]
+                            'nombre': nombre,
+                            'descripcion': descripcion,
+                            'cantidad': cantidad,
+                            'precio_compra': precio_compra,
+                            'precio_venta': precio_venta,
+                            'codigo_barras': codigo_barras,
                         }
                     )
-            messages.success(request, 'Productos cargados exitosamente.')
+            
+            # Agregar mensaje de éxito
+            messages.success(request, 'La plantilla se subió y procesó con éxito.')
             return redirect('product_management')
         except Exception as e:
             messages.error(request, f'Error procesando el archivo: {str(e)}')
             return redirect('upload_products')
 
     return render(request, 'products/upload_products.html')
+
+
 
 def download_template(request):
     # Crear un archivo Excel como plantilla
@@ -71,11 +95,12 @@ def download_template(request):
     workbook = Workbook()
     sheet = workbook.active
     sheet.title = 'Productos'
-    headers = ['Nombre', 'Descripción', 'Cantidad', 'Precio de Compra', 'Precio de Venta', 'Código de Barras']
+    headers = ['Producto ID', 'Nombre', 'Descripción', 'Cantidad', 'Precio de Compra', 'Precio de Venta', 'Código de Barras']
     sheet.append(headers)
 
     workbook.save(response)
     return response
+
 
 
 def create_or_edit_product(request, product_id=None):
