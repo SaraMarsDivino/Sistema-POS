@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2>Reporte de Venta</h2>
+    <p><strong>ID Venta:</strong> {{ sale.id }}</p>
+    <p><strong>Empleado:</strong> {{ sale.empleado.username }}</p>
+    <p><strong>Fecha:</strong> {{ sale.fecha }}</p>
+    <hr>
+    <h3>Detalle de la Venta</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Precio Unitario</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for detail in details %}
+            <tr>
+                <td>{{ detail.producto.nombre }}</td>
+                <td>{{ detail.cantidad }}</td>
+                <td>${{ detail.precio_unitario|floatformat:2 }}</td>
+                <td>${{ detail.cantidad|floatformat:2|floatformat:2|add:detail.precio_unitario }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <p><strong>Total Venta:</strong> ${{ sale.total }}</p>
+    <button onclick="window.print()" class="btn btn-primary">Imprimir</button>
+    <br>
+    <a href="{% url 'sales_history' %}" class="btn btn-secondary mt-3">Volver al Historial de Ventas</a>
+</div>
+{% endblock %}

@@ -1,0 +1,109 @@
+.cashier-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.header h2, .header h3 {
+    text-align: center;
+}
+
+.columns {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    max-width: 1200px;
+}
+
+.column {
+    width: 30%;
+    padding: 20px;
+    background-color: #cbe5e9;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(2, 24, 85, 0.1);
+}
+
+.search-products, .shopping-cart, .payment-options {
+    margin-bottom: 20px;
+}
+
+h4 {
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+
+.form-control {
+    margin-bottom: 10px;
+    padding: 10px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Botones en grupos */
+.option-group {
+    margin-bottom: 15px;
+}
+
+.option-group label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.btn-group .btn {
+    margin: 5px;
+    padding: 8px 12px;
+    font-size: 0.9em;
+}
+
+/* Estilo para los botones seleccionados */
+.btn-group .btn.active {
+    background-color: #007bff;  /* Fondo azul para botón activo */
+    color: rgb(255, 255, 255);               /* Texto blanco para botón activo */
+    border: 2px solid black;    /* Borde negro para resaltar el botón */
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.5); /* Opcional: sombra para mayor énfasis */
+    border-radius: 4px;         /* Redondeo del borde */
+}
+
+
+#cart-items td, #cart-items th {
+    padding: 10px;
+    text-align: center;
+}
+
+#total-price {
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+.product-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px;
+    border-bottom: 1px solid #ddd;
+    cursor: pointer;
+}
+
+.product-item:hover {
+    background-color: #f0f8ff;
+}
+
+.product-name {
+    flex-grow: 1;
+}
+
+.add-button {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    font-size: 1em;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.add-button:hover {
+    background-color: #218838;
+}

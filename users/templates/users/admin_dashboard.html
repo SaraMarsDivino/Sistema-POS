@@ -1,0 +1,35 @@
+    {% extends 'base.html' %}
+    {% load static %}
+
+    {% block title %}Admin Dashboard{% endblock %}
+
+    {% block content %}
+        <div class="container">
+            <h2>Bienvenido al panel de administración</h2>
+            <div class="dashboard-cards">
+                <div class="card">
+                    <h3>Gestión de Productos</h3>
+                    <p>Administrar inventario, agregar y editar productos.</p>
+                    <a href="{% url 'product_management' %}">Ir a Gestión de Productos</a>
+                </div>
+                <div class="card">
+                    <h3>Gestión de Usuarios</h3>
+                    <p>Administrar permisos y roles de usuarios.</p>
+                    <a href="{% url 'user_management' %}">Ir a Gestión de Usuarios</a>
+                </div>
+                <div class="card">
+                    <h3>Gestión de Ventas</h3>
+                    <p>Ver y generar reportes de ventas.</p>
+                    <a href="{% url 'report_dashboard' %}">Ir a Gestión de Ventas</a>
+                </div>
+                <div class="card">
+                    <h3>Modo Cashier</h3>
+                    <p>Acceso rápido al modo cajero para ventas.</p>
+                    <a href="{% url 'cashier_dashboard' %}">Ir a Modo Cashier</a>
+                </div>
+            </div>
+            <div class="logout">
+                <a href="{% url 'logout' %}">Cerrar Sesión</a>
+            </div>
+        </div>
+    {% endblock %}
