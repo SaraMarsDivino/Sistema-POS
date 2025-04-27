@@ -13,7 +13,11 @@
         <button type="submit" class="btn btn-primary">Abrir Caja</button>
     </form>
 </div>
-<div>
-    <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary mt-3">Volver</a>
+<div class="d-flex justify-content-between mt-3">
+    {% if not user.is_superuser %}
+        <a href="{% url 'logout' %}" class="btn btn-danger">Cerrar Sesión</a>
+    {% endif %}
+    <a href="{% url 'cashier_dashboard' %}" class="btn btn-secondary">Volver</a>
 </div>
+
 {% endblock %}

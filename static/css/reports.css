@@ -1,0 +1,22 @@
+/* Estilo compacto para filtros */
+.filtros-container {
+    padding: 10px;
+    background-color: #2f3136;
+    border-radius: 10px;
+}
+
+.filtros-container .form-control, .filtros-container .btn {
+    font-size: 14px;
+    padding: 6px;
+}
+
+.filtros-container label {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+/* Estilo para tablas */
+table {
+    border-radius: 8px;
+    overflow: hidden;
+}

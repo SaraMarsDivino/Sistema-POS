@@ -1,30 +1,41 @@
-# users/views.py
-
+#user/views.py
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.hashers import make_password
 from auth_app.models import User
 from .forms import UserForm  # Asegura que UserForm esté configurado con los campos necesarios
 
 
+def is_admin(user):
+    """Función auxiliar para verificar si un usuario es administrador."""
+    return user.is_authenticated and user.is_staff
+
+
 @login_required
 def home(request):
-    # Redirige a la vista según si el usuario es admin o cajero
+    """Redirige a la vista correcta según el rol del usuario."""
     if request.user.is_superuser:
         return redirect('admin_dashboard')
     else:
         return redirect('cashier_dashboard')
 
+
+@user_passes_test(is_admin, login_url='cashier_dashboard')
 @login_required
 def admin_dashboard(request):
+    """Vista del dashboard de administración (solo accesible para admin)."""
     return render(request, 'users/admin_dashboard.html')
+
 
 @login_required
 def cashier_dashboard(request):
-    return render(request, 'cashier/dashboard.html')  # Vista de cajero
+    """Vista del modo cajero (todos los usuarios pueden acceder)."""
+    return render(request, 'cashier/dashboard.html')
+
 
 def custom_login(request):
+    """Manejo de autenticación personalizada."""
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
@@ -36,37 +47,47 @@ def custom_login(request):
             return render(request, 'users/login.html', {'error': 'Credenciales incorrectas'})
     return render(request, 'users/login.html')
 
+
 @login_required
 def profile(request):
+    """Vista del perfil del usuario."""
     return render(request, 'users/profile.html', {'user': request.user})
 
+
 def custom_logout(request):
+    """Cerrar sesión y redirigir a login."""
     logout(request)
     return redirect('login')
 
+
+@user_passes_test(is_admin, login_url='cashier_dashboard')
 @login_required
 def user_management(request):
-    # Vista de gestión de usuarios
+    """Vista de gestión de usuarios (solo accesible para admin)."""
     users = User.objects.all()
     return render(request, 'users/user_management.html', {'users': users})
 
+
+@user_passes_test(is_admin, login_url='cashier_dashboard')
 @login_required
 def create_user(request):
-    # Vista para crear un nuevo usuario
+    """Crear un nuevo usuario (solo accesible para admin)."""
     if request.method == 'POST':
         form = UserForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
-            user.password = make_password(form.cleaned_data['password'])  # Encripta la contraseña
+            user.password = make_password(form.cleaned_data['password'])  # Hasheamos la contraseña
             user.save()
-            return redirect('user_management')
+            return redirect('user_management')  # Redirige a gestión de usuarios después de crear
     else:
         form = UserForm()
     return render(request, 'users/create_user.html', {'form': form})
 
+
+@user_passes_test(is_admin, login_url='cashier_dashboard')
 @login_required
 def edit_user(request, user_id):
-    # Vista para editar un usuario existente
+    """Editar usuario existente (solo accesible para admin)."""
     user = get_object_or_404(User, id=user_id)
     if request.method == 'POST':
         form = UserForm(request.POST, instance=user)
@@ -77,40 +98,14 @@ def edit_user(request, user_id):
         form = UserForm(instance=user)
     return render(request, 'users/edit_user.html', {'form': form, 'user': user})
 
+
+@user_passes_test(is_admin, login_url='cashier_dashboard')
 @login_required
 def delete_user(request, user_id):
-    # Vista para eliminar un usuario
+    """Eliminar usuario (solo accesible para admin)."""
     user = get_object_or_404(User, id=user_id)
-    print(user)
     if request.method == 'POST':
         user.delete()
         return redirect('user_management')
     return render(request, 'users/delete_user.html', {'user': user})
-
-
-
-@login_required
-def create_user(request):
-    if request.method == 'POST':
-        form = UserForm(request.POST)
-        if form.is_valid():
-            user = form.save(commit=False)
-            user.password = make_password(form.cleaned_data['password'])  # Hasheamos la contraseña
-            user.save()
-            return redirect('user_management')  # Redirige a la vista de gestión de usuarios después de crear el usuario
-    else:
-        form = UserForm()
-    return render(request, 'users/create_user.html', {'form': form})
-
-def create_user(request):
-    # Vista para crear un nuevo usuario
-    if request.method == 'POST':
-        form = UserForm(request.POST)
-        if form.is_valid():
-            user = form.save(commit=False)
-            user.password = make_password(form.cleaned_data['password'])  # Encripta la contraseña
-            user.save()
-            return redirect('user_management')
-    else:
-        form = UserForm()
-    return render(request, 'users/create_user.html', {'form': form})
+    

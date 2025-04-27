@@ -1,34 +1,47 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'css/reports.css' %}">
+{% endblock %}
 
 {% block content %}
 <div class="container">
     <h2>Historial de Ventas</h2>
 
-    <!-- Formulario de filtros -->
-    <form method="get" class="form-inline mb-3">
-        <label for="fecha_inicio" class="mr-2">Fecha Inicio:</label>
-        <input type="date" id="fecha_inicio" name="fecha_inicio" class="form-control mr-2"
-               value="{{ fecha_inicio|date:'Y-m-d' }}">
+    <!-- Formulario de filtros optimizado -->
+    <form method="get" class="row align-items-end mb-3 filtros-container">
+        <div class="col-md-3 col-6">
+            <label for="fecha_inicio" class="form-label">Fecha Inicio:</label>
+            <input type="date" id="fecha_inicio" name="fecha_inicio" class="form-control"
+                value="{{ fecha_inicio|date:'Y-m-d' }}">
+        </div>
 
-        <label for="fecha_fin" class="mr-2">Fecha Fin:</label>
-        <input type="date" id="fecha_fin" name="fecha_fin" class="form-control mr-2"
-               value="{{ fecha_fin|date:'Y-m-d' }}">
+        <div class="col-md-3 col-6">
+            <label for="fecha_fin" class="form-label">Fecha Fin:</label>
+            <input type="date" id="fecha_fin" name="fecha_fin" class="form-control"
+                value="{{ fecha_fin|date:'Y-m-d' }}">
+        </div>
 
-        <label for="empleado" class="mr-2">Empleado:</label>
-        <select id="empleado" name="empleado" class="form-control mr-2">
-            <option value="">Todos</option>
-            {% for empleado in empleados %}
-                <option value="{{ empleado.id }}" {% if empleado_id == empleado.id %}selected{% endif %}>
-                    {{ empleado.username }}
-                </option>
-            {% endfor %}
-        </select>
+        <div class="col-md-3 col-6">
+            <label for="empleado" class="form-label">Empleado:</label>
+            <select id="empleado" name="empleado" class="form-control">
+                <option value="">Todos</option>
+                {% for empleado in empleados %}
+                    <option value="{{ empleado.id }}" {% if empleado_id == empleado.id %}selected{% endif %}>
+                        {{ empleado.username }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
 
-        <button type="submit" class="btn btn-primary">Filtrar</button>
+        <div class="col-md-3 col-6 d-flex justify-content-end">
+            <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+        </div>
     </form>
 
     <!-- Tabla de ventas -->
-    <table class="table">
+    <table class="table" id="historial-ventas">
         <thead>
             <tr>
                 <th>ID</th>
@@ -57,22 +70,26 @@
         </tbody>
     </table>
 
-    <!-- Paginación -->
+    <!-- Paginación con desplazamiento automático -->
     <nav aria-label="Paginación">
         <ul class="pagination">
             {% if sales.has_previous %}
             <li class="page-item">
-                <a class="page-link" href="?{% if fecha_inicio %}fecha_inicio={{ fecha_inicio|date:'Y-m-d' }}&{% endif %}{% if fecha_fin %}fecha_fin={{ fecha_fin|date:'Y-m-d' }}&{% endif %}{% if empleado_id %}empleado={{ empleado_id }}&{% endif %}page={{ sales.previous_page_number }}" aria-label="Anterior">
-                    <span aria-hidden="true">&laquo;</span>
-                </a>
+                <a class="page-link" href="?page=1#historial-ventas" aria-label="Primera">&laquo;</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ sales.previous_page_number }}#historial-ventas" aria-label="Anterior">&lsaquo;</a>
             </li>
             {% endif %}
+
             <li class="page-item disabled"><span class="page-link">Página {{ sales.number }} de {{ sales.paginator.num_pages }}</span></li>
+
             {% if sales.has_next %}
             <li class="page-item">
-                <a class="page-link" href="?{% if fecha_inicio %}fecha_inicio={{ fecha_inicio|date:'Y-m-d' }}&{% endif %}{% if fecha_fin %}fecha_fin={{ fecha_fin|date:'Y-m-d' }}&{% endif %}{% if empleado_id %}empleado={{ empleado_id }}&{% endif %}page={{ sales.next_page_number }}" aria-label="Siguiente">
-                    <span aria-hidden="true">&raquo;</span>
-                </a>
+                <a class="page-link" href="?page={{ sales.next_page_number }}#historial-ventas" aria-label="Siguiente">&rsaquo;</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ sales.paginator.num_pages }}#historial-ventas" aria-label="Última">&raquo;</a>
             </li>
             {% endif %}
         </ul>
@@ -81,4 +98,16 @@
     <br>
     <a href="{% url 'report_dashboard' %}" class="btn btn-secondary">Volver al Dashboard de Reportes</a>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        if (window.location.href.includes("page=")) {
+            const tableElement = document.getElementById("historial-ventas");
+            if (tableElement) {
+                tableElement.scrollIntoView({ behavior: "smooth", block: "start" });
+            }
+        }
+    });
+</script>
+
 {% endblock %}

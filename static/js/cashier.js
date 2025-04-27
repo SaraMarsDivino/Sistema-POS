@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // Elementos principales del DOM
     const cerrarCajaBtn = document.getElementById("close-cash-button");
     const confirmarCompraButton = document.getElementById("confirmar-compra");
     const cantidadPagadaInput = document.getElementById("cantidad_pagada");
@@ -8,91 +7,68 @@ document.addEventListener("DOMContentLoaded", () => {
     const cartItemsContainer = document.getElementById("cart-items");
     const searchButton = document.getElementById("product-search-button");
     const searchInput = document.getElementById("product-search-input");
-    const barcodeInput = document.getElementById("barcode-input");
     const resultsList = document.getElementById("product-search-results");
-    let carrito = [];
+    const formaPagoButtons = document.querySelectorAll(".btn-group button");
+    let carrito = new Map();
     let totalCarrito = 0;
 
-    // Obtener el token CSRF
     function getCSRFToken() {
-        const cookies = document.cookie.split("; ");
-        for (let cookie of cookies) {
-            const [name, value] = cookie.split("=");
-            if (name === "csrftoken") return value;
+        return document.cookie.split("; ").find(row => row.startsWith("csrftoken="))?.split("=")[1] || null;
+    }
+
+    function showToast(message, type = "success") {
+        let toastContainer = document.getElementById("toast-container");
+        if (!toastContainer) {
+            toastContainer = document.createElement("div");
+            toastContainer.id = "toast-container";
+            toastContainer.style.position = "fixed";
+            toastContainer.style.top = "20px";
+            toastContainer.style.right = "20px";
+            toastContainer.style.zIndex = "1050";
+            document.body.appendChild(toastContainer);
         }
-        return null;
+
+        const toastId = `toast-${Date.now()}`;
+        const toastHtml = `
+            <div id="${toastId}" class="toast align-items-center text-white bg-${type} border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body fs-6">
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+        `;
+        toastContainer.innerHTML += toastHtml;
+        const toastElement = document.getElementById(toastId);
+        const toastInstance = new bootstrap.Toast(toastElement, { delay: 4000 });
+        toastInstance.show();
+        setTimeout(() => toastElement.remove(), 4500);
     }
 
-    // Mostrar alertas en lugar de Toasts o Modales
-    function showAlert(message, type = "success") {
-        const prefix = type === "success" ? "[Éxito]" : "[Error]";
-        alert(`${prefix} ${message}`);
-    }
-
-    // Restaurar selección desde localStorage
-    function restoreSelection(buttonGroup, storageKey) {
-        const selectedButtonId = localStorage.getItem(storageKey);
-        if (selectedButtonId) {
-            toggleButtonGroup(buttonGroup, selectedButtonId, storageKey);
-        }
-    }
-
-    // Activar un botón de un grupo y guardar selección en localStorage
-    function toggleButtonGroup(buttonGroupSelector, selectedButtonId, storageKey) {
-        const buttons = document.querySelectorAll(buttonGroupSelector);
-        buttons.forEach(button => {
-            if (button.id === selectedButtonId) {
-                button.classList.add("active");
-                localStorage.setItem(storageKey, selectedButtonId);
-            } else {
-                button.classList.remove("active");
-            }
-        });
-    }
-
-    // Calcular el vuelto
     function calcularVuelto() {
         const cantidadPagada = parseFloat(cantidadPagadaInput.value) || 0;
         const totalCarrito = parseFloat(totalPriceElement.textContent.replace("$", "")) || 0;
-
         const vuelto = cantidadPagada - totalCarrito;
         vueltoElement.textContent = `$${vuelto.toFixed(2)}`;
     }
 
-    if (cantidadPagadaInput) {
-        cantidadPagadaInput.addEventListener("input", calcularVuelto);
+    if (cantidadPagadaInput) cantidadPagadaInput.addEventListener("input", calcularVuelto);
+
+    function debounce(func, delay = 300) {
+        let timeout;
+        return (...args) => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func(...args), delay);
+        };
     }
 
-    // Configuración de botones para Tipo de Venta
-    document.getElementById("boleta").addEventListener("click", () => toggleButtonGroup('.btn-group[aria-label="Tipo de Venta"] .btn', "boleta", "tipo_venta"));
-    document.getElementById("factura").addEventListener("click", () => toggleButtonGroup('.btn-group[aria-label="Tipo de Venta"] .btn', "factura", "tipo_venta"));
-
-    // Configuración de botones para Forma de Pago
-    document.getElementById("efectivo").addEventListener("click", () => toggleFormaPago("efectivo"));
-    document.getElementById("debito").addEventListener("click", () => toggleFormaPago("debito"));
-    document.getElementById("credito").addEventListener("click", () => toggleFormaPago("credito"));
-
-    function toggleFormaPago(metodo) {
-        toggleButtonGroup('.btn-group[aria-label="Forma de Pago"] .btn', metodo, "forma_pago");
-        if (metodo === "efectivo") {
-            cantidadPagadaInput.value = "";
-        } else {
-            cantidadPagadaInput.value = totalCarrito.toFixed(2);
-        }
-        calcularVuelto();
-    }
-
-    // Buscar productos
-    searchButton.addEventListener("click", async () => {
+    searchButton.addEventListener("click", debounce(async () => {
         const query = searchInput.value.trim();
-        if (!query) {
-            showAlert("Por favor, ingresa un término de búsqueda.", "error");
-            return;
-        }
+        if (!query) return showToast("Ingresa un término de búsqueda.", "warning");
 
         try {
             const response = await fetch(`/cashier/buscar-producto/?q=${query}`);
-            if (!response.ok) throw new Error("Error al buscar productos.");
             const data = await response.json();
             resultsList.innerHTML = "";
 
@@ -103,28 +79,35 @@ document.addEventListener("DOMContentLoaded", () => {
 
             data.productos.forEach(producto => {
                 const li = document.createElement("li");
-                li.textContent = `${producto.nombre} - $${producto.precio_venta}`;
-                const addButton = document.createElement("button");
-                addButton.textContent = "+";
-                addButton.classList.add("btn", "btn-success", "btn-sm", "ml-2");
-                addButton.addEventListener("click", () => agregarAlCarrito(producto.id, producto.nombre, parseFloat(producto.precio_venta)));
-                li.appendChild(addButton);
+                li.innerHTML = `${producto.nombre} - $${producto.precio_venta} 
+                    <button class="btn btn-success btn-sm ml-2" 
+                        data-id="${producto.id}" 
+                        data-nombre="${producto.nombre}" 
+                        data-precio="${producto.precio_venta}">+</button>`;
                 resultsList.appendChild(li);
             });
         } catch (error) {
             console.error("Error al buscar productos:", error);
-            showAlert("Error al buscar productos.", "error");
+            showToast("Error en la búsqueda.", "danger");
+        }
+    }, 500));
+
+    resultsList.addEventListener("click", (e) => {
+        if (e.target.tagName === "BUTTON") {
+            const { id, nombre, precio } = e.target.dataset;
+            agregarAlCarrito(parseInt(id), nombre, parseFloat(precio));
         }
     });
 
-    // Agregar productos al carrito
     function agregarAlCarrito(productoId, nombre, precio) {
-        const productoExistente = carrito.find(item => item.producto_id === productoId);
-        if (productoExistente) {
-            productoExistente.cantidad += 1;
-        } else {
-            carrito.push({ producto_id: productoId, nombre, precio, cantidad: 1 });
+        if (!productoId) {
+            console.error("Error: Falta productoId al agregar al carrito");
+            return;
         }
+
+        const cantidad = carrito.has(productoId) ? carrito.get(productoId).cantidad + 1 : 1;
+        carrito.set(productoId, { producto_id: productoId, nombre, precio, cantidad });
+
         actualizarCarrito();
     }
 
@@ -132,166 +115,111 @@ document.addEventListener("DOMContentLoaded", () => {
         cartItemsContainer.innerHTML = "";
         totalCarrito = 0;
 
-        carrito.forEach((item, index) => {
+        carrito.forEach(({ producto_id, nombre, precio, cantidad }) => {
             const row = document.createElement("tr");
             row.innerHTML = `
-                <td>${item.cantidad}</td>
-                <td>${item.nombre}</td>
-                <td>$${(item.cantidad * item.precio).toFixed(2)}</td>
+                <td>${cantidad}</td>
+                <td>${nombre}</td>
+                <td>$${(cantidad * precio).toFixed(2)}</td>
                 <td>
-                    <button class="btn btn-success btn-sm increment-btn" data-id="${item.producto_id}" data-index="${index}">+</button>
-                    <button class="btn btn-danger btn-sm decrement-btn" data-id="${item.producto_id}" data-index="${index}">-</button>
+                    <button class="btn btn-success btn-sm" data-id="${producto_id}" data-action="increment">+</button>
+                    <button class="btn btn-danger btn-sm" data-id="${producto_id}" data-action="decrement">-</button>
                 </td>
             `;
             cartItemsContainer.appendChild(row);
-            totalCarrito += item.cantidad * item.precio;
+            totalCarrito += cantidad * precio;
         });
 
         totalPriceElement.textContent = `$${totalCarrito.toFixed(2)}`;
         calcularVuelto();
     }
 
-    // Manejo de botones dinámicos en carrito
     cartItemsContainer.addEventListener("click", (e) => {
-        if (e.target.classList.contains("increment-btn")) {
-            const productoId = parseInt(e.target.dataset.id);
-            incrementarCantidad(productoId);
-        } else if (e.target.classList.contains("decrement-btn")) {
-            const productoId = parseInt(e.target.dataset.id);
-            eliminarDelCarrito(productoId);
+        const productoId = parseInt(e.target.dataset.id);
+        if (!productoId) return;
+
+        if (e.target.dataset.action === "increment") {
+            carrito.get(productoId).cantidad++;
+        } else if (e.target.dataset.action === "decrement") {
+            carrito.get(productoId).cantidad--;
+            if (carrito.get(productoId).cantidad <= 0) carrito.delete(productoId);
         }
+        actualizarCarrito();
     });
 
-    function incrementarCantidad(productoId) {
-        const productoExistente = carrito.find(item => item.producto_id === productoId);
-        if (productoExistente) {
-            productoExistente.cantidad += 1;
-            actualizarCarrito();
-        }
-    }
-
-    function eliminarDelCarrito(productoId) {
-        const productoIndex = carrito.findIndex(item => item.producto_id === productoId);
-        if (productoIndex !== -1) {
-            carrito[productoIndex].cantidad -= 1;
-            if (carrito[productoIndex].cantidad <= 0) {
-                carrito.splice(productoIndex, 1);
-            }
-            actualizarCarrito();
-        }
-    }
-
-    // Confirmar compra
     confirmarCompraButton.addEventListener("click", async () => {
-        if (carrito.length === 0) {
-            showAlert("El carrito está vacío.", "error");
-            return;
-        }
-    
-        const tipoVenta = document.querySelector(".btn-group[aria-label='Tipo de Venta'] .active")?.id || "boleta";
-        const formaPago = document.querySelector(".btn-group[aria-label='Forma de Pago'] .active")?.id || "efectivo";
-        const clientePaga = parseFloat(cantidadPagadaInput.value) || 0;
-    
+        if (carrito.size === 0) return showToast("El carrito está vacío.", "warning");
+
+        const carritoArray = Array.from(carrito.values());
+        console.log("🔍 Enviando carrito:", carritoArray);
+
         try {
             const response = await fetch("/cashier/", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRFToken": getCSRFToken()
-                },
-                body: JSON.stringify({
-                    carrito,
-                    tipo_venta: tipoVenta,
-                    forma_pago: formaPago,
-                    cliente_paga: clientePaga
-                })
+                headers: { "Content-Type": "application/json", "X-CSRFToken": getCSRFToken() },
+                body: JSON.stringify({ carrito: carritoArray })
             });
-    
+
             if (!response.ok) {
                 const data = await response.json();
-                showAlert(data.error || "Error en el proceso de venta.", "error");
-                return;
+                return showToast(data.error || "Error en la compra.", "danger");
             }
-    
-            const data = await response.json();
-            showAlert("Compra confirmada con éxito.", "success");
-            carrito = [];
+
+            showToast("Compra confirmada con éxito.", "success");
+            carrito.clear();
             actualizarCarrito();
         } catch (error) {
             console.error("Error al confirmar compra:", error);
-            showAlert("Error al confirmar compra.", "error");
+            showToast("Error al procesar la compra.", "danger");
         }
     });
+
+
+        // Llenar automáticamente el monto al seleccionar débito o crédito
+        formaPagoButtons.forEach(button => {
+            button.addEventListener("click", () => {
+                if (button.id === "debito" || button.id === "credito") {
+                    cantidadPagadaInput.value = totalCarrito.toFixed(2);
+                    calcularVuelto();
+                }
+            });
+        }); 
     
 
-    // Cerrar caja
-    if (cerrarCajaBtn) {
-        cerrarCajaBtn.addEventListener("click", async () => {
-            try {
-                const response = await fetch("/cashier/cerrar_caja/", {
-                    method: "POST",
-                    headers: {
-                        "X-CSRFToken": getCSRFToken(),
-                        "Content-Type": "application/json"
-                    }
-                });
-
-                if (response.ok) {
+        if (cerrarCajaBtn) {
+            cerrarCajaBtn.addEventListener("click", async () => {
+                try {
+                    const response = await fetch("/cashier/cerrar_caja/", {
+                        method: "POST",
+                        headers: {
+                            "X-CSRFToken": getCSRFToken(),
+                            "Content-Type": "application/json"
+                        }
+                    });
+        
                     const data = await response.json();
+                    console.log("📊 Respuesta del servidor al cerrar caja:", data);  // Debugging
+        
                     if (data.success) {
-                        showAlert(data.mensaje || "Caja cerrada con éxito.", "success");
-                        window.location.href = "/cashier/";
+                        showToast(`Caja cerrada con éxito.`, "success");
+        
+                        // 🔀 Redirigir solo si el ID de la caja está presente
+                        if (data.caja_id) {
+                            console.log(`🔀 Redirigiendo a: /cashier/detalle-caja/${data.caja_id}/`);
+                            window.location.href = `/cashier/detalle-caja/${data.caja_id}/`;
+                        } else {
+                            console.error("⚠️ Error: 'caja_id' no está presente en la respuesta.");
+                            showToast("Error: No se pudo obtener el ID de la caja.", "danger");
+                        }
                     } else {
-                        showAlert(data.error || "Error al cerrar la caja.", "error");
+                        showToast(data.error || "Error al cerrar la caja.", "danger");
                     }
-                } else {
-                    showAlert("Error al cerrar la caja. Verifica los permisos.", "error");
+                } catch (error) {
+                    console.error("❌ Error al cerrar caja:", error);
+                    showToast("Error al cerrar la caja.", "danger");
                 }
-            } catch (error) {
-                console.error("Error al cerrar caja:", error);
-                showAlert("Ocurrió un error al cerrar la caja.", "error");
-            }
-        });
-    }
-});
-document.addEventListener("DOMContentLoaded", () => {
-    const closeCashButton = document.getElementById("close-cash-button");
-
-    if (closeCashButton) {
-        closeCashButton.addEventListener("click", async () => {
-            try {
-                const response = await fetch("/cashier/cerrar_caja/", {
-                    method: "POST",
-                    headers: {
-                        "X-CSRFToken": getCSRFToken(),
-                        "Content-Type": "application/json"
-                    }
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.success) {
-                        alert(data.mensaje || "Caja cerrada con éxito.");
-                        window.location.href = "/cashier/";
-                    } else {
-                        alert(data.error || "Error al cerrar la caja.");
-                    }
-                } else {
-                    alert("Error al cerrar la caja. Verifica los permisos.");
-                }
-            } catch (error) {
-                console.error("Error al cerrar caja:", error);
-                alert("Ocurrió un error al cerrar la caja.");
-            }
-        });
-    }
-
-    function getCSRFToken() {
-        const cookies = document.cookie.split("; ");
-        for (let cookie of cookies) {
-            const [name, value] = cookie.split("=");
-            if (name === "csrftoken") return value;
+            });
         }
-        return null;
-    }
+        
+        
 });
