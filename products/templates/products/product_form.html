@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2>{{ title }}</h2>
+    
+    <!-- Toast de Bootstrap para mensajes -->
+    <div id="toast-container" class="position-fixed top-0 end-0 p-3" style="z-index: 1050; width: 350px;">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="toast align-items-center text-white bg-success border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="d-flex">
+                        <div class="toast-body fs-5">
+                            {{ message }}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="producto_id">ID del Producto</label>
+            {{ form.producto_id }}
+        </div>
+        
+        <div class="form-group">
+            <label for="nombre">Nombre</label>
+            {{ form.nombre }}
+        </div>
+        
+        <div class="form-group">
+            <label for="descripcion">Descripción</label>
+            {{ form.descripcion }}
+        </div>
+        
+        <div class="form-group">
+            <label for="cantidad">Cantidad</label>
+            {{ form.cantidad }}
+        </div>
+        
+        <div class="form-group">
+            <label for="precio_compra">Precio Compra</label>
+            {{ form.precio_compra }}
+        </div>
+        
+        <div class="form-group">
+            <label for="precio_venta">Precio Venta</label>
+            {{ form.precio_venta }}
+        </div>
+        
+        <div class="form-group">
+            <label for="codigo_barras">Código de Barras</label>
+            {{ form.codigo_barras }}
+        </div>
+        
+        <div class="form-group form-check">
+            <input type="checkbox" class="form-check-input" id="permitir_venta_sin_stock" name="permitir_venta_sin_stock" {{ form.permitir_venta_sin_stock.value|yesno:"checked," }}>
+            <label class="form-check-label" for="permitir_venta_sin_stock">Permitir venta sin stock</label>
+        </div>
+        
+        <button type="submit" class="btn btn-success" name="save_only">Guardar</button>
+        <button type="submit" class="btn btn-primary" name="save_and_list">Guardar y Volver a la Lista</button>
+        
+        <a href="{% url 'product_management' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        let toastElList = [].slice.call(document.querySelectorAll('.toast'));
+        let toastList = toastElList.map(function(toastEl) {
+            return new bootstrap.Toast(toastEl, { delay: 3000 });
+        });
+        toastList.forEach(toast => toast.show());
+    });
+</script>
+{% endblock %}
+
+{% endblock %}

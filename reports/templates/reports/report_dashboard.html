@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2 class="text-center">Reportes</h2>
+    <div class="card-container">
+        <div class="card">
+            <h3>Historial de Ventas</h3>
+            <p>Consulta el historial detallado de las ventas realizadas.</p>
+            <a href="{% url 'sales_history' %}" class="btn">Ir al Historial de Ventas</a>
+        </div>
+        <div class="card">
+            <h3>Historial de Caja</h3>
+            <p>Consulta los registros de apertura y cierre de caja.</p>
+            <a href="{% url 'cash_history' %}" class="btn">Ir al Historial de Caja</a>
+        </div>
+    </div>
+    <div class="text-center mt-4">
+        <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary">Volver</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2>Cierre de Caja</h2>
+    <p><strong>Efectivo Inicial:</strong> ${{ caja.efectivo_inicial|default:"0.00" }}</p>
+    <p><strong>Total en Débito:</strong> ${{ caja.total_ventas_debito|default:"0.00" }}</p>
+    <p><strong>Total en Crédito:</strong> ${{ caja.total_ventas_credito|default:"0.00" }}</p>
+    <p><strong>Vuelto Entregado:</strong> ${{ caja.vuelto_entregado|default:"0.00" }}</p>
+    <p><strong>Efectivo Final en Caja:</strong> ${{ caja.efectivo_final|default:"0.00" }}</p>
+    <p><strong>Total de Ventas:</strong> ${{ caja.ventas_totales|default:"0.00" }}</p>
+
+    <button onclick="window.print()" class="btn btn-primary">Imprimir Detalle</button>
+    <div>
+        <a href="{% url 'cashier_dashboard' %}" class="btn btn-secondary mt-3">Volver a Cajero</a>
+    </div>
+</div>
+{% endblock %}
+

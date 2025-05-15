@@ -1,0 +1,135 @@
+/* Global Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #181a1b;
+    color: #e0e0e0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Contenedor Principal */
+.container {
+    flex: 1;
+    max-width: 1200px;
+    padding: 20px;
+    background-color: #202225;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+/* Botones */
+button, .btn {
+    background-color: #5865f2;
+    color: #ffffff;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+button:hover, .btn:hover {
+    background-color: #4752c4;
+    transform: scale(1.05);
+}
+
+/* Tarjetas */
+.card {
+    background-color: #2f3136;
+    border: 1px solid #40444b;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    text-align: center;
+    transition: transform 0.2s, box-shadow 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+.card h3 {
+    font-size: 20px;
+    color: #ffffff;
+}
+
+.card p {
+    color: #b9bbbe;
+}
+
+/* Footer */
+footer {
+    background-color: #202225;
+    color: #b9bbbe;
+    text-align: center;
+    padding: 15px 0;
+    font-size: 14px;
+    margin-top: auto;
+    width: 100%;
+    border-top: 1px solid #40444b;
+}
+
+/* Diseño Responsivo */
+@media screen and (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+
+    .btn {
+        font-size: 14px;
+        padding: 8px 16px;
+    }
+}
+
+/* Mejor distribución de tarjetas */
+.card-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-top: 20px;
+    justify-content: center;
+}
+
+/* Botón principal */
+.btn-primary {
+    background-color: #5865f2;
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: #4752c4;
+}
+
+/* ✅ FORMULARIO DE FILTROS OPTIMIZADO */
+form .form-control, form .btn {
+    padding: 6px;
+    font-size: 14px;
+}
+
+form label {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+/* Espaciado entre columnas en pantallas grandes */
+@media (min-width: 768px) {
+    form .col-md-3 {
+        margin-bottom: 0;
+    }
+}
+
+/* En pantallas pequeñas, reducir más */
+@media (max-width: 767px) {
+    form .col-6 {
+        margin-bottom: 10px;
+    }
+}

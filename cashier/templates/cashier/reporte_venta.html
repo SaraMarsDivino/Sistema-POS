@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte de Venta</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .reporte {
+            width: 300px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        .btn-imprimir {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="reporte">
+        <h3>Reporte de Venta</h3>
+        <p><strong>ID Venta:</strong> {{ venta.id }}</p>
+        <p><strong>Fecha:</strong> {{ venta.fecha|date:"d/m/Y H:i" }}</p>
+        <p><strong>Empleado:</strong> {{ venta.empleado.username }}</p>
+        <p><strong>Forma de Pago:</strong> {{ venta.get_forma_pago_display }}</p>
+        <p><strong>Total:</strong> ${{ venta.total|floatformat:2 }}</p>
+
+        <h4>Detalles</h4>
+        <table style="width: 100%; text-align: left;">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Cantidad</th>
+                    <th>Precio</th>
+                    <th>Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for detalle in detalles %}
+                <tr>
+                    <td>{{ detalle.producto.nombre }}</td>
+                    <td>{{ detalle.cantidad }}</td>
+                    <td>${{ detalle.precio_unitario|floatformat:2 }}</td>
+                    <td>${{ detalle.subtotal|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <button class="btn-imprimir" onclick="window.print()">Imprimir</button>
+    </div>
+</body>
+</html>

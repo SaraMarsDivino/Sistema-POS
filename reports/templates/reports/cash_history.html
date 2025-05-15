@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'css/reports.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Historial de Caja</h2>
+
+    <table class="table" id="historial-caja">
+        <thead>
+            <tr>
+                <th>Fecha Apertura</th>
+                <th>Fecha Cierre</th>
+                <th>Efectivo Inicial</th>
+                <th>Total Ventas</th>
+                <th>Efectivo Final</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for caja in cajas %}
+            <tr>
+                <td>{{ caja.fecha_apertura|date:"d/m/Y H:i" }}</td>
+                <td>
+                    {% if caja.fecha_cierre %}
+                        {{ caja.fecha_cierre|date:"d/m/Y H:i" }}
+                    {% else %}
+                        <em>Sin cerrar</em>
+                    {% endif %}
+                </td>
+                <td>${{ caja.efectivo_inicial|floatformat:2 }}</td>
+                <td>${{ caja.ventas_totales|default:0|floatformat:2 }}</td>
+                <td>
+                    {% if caja.efectivo_final %}
+                        ${{ caja.efectivo_final|floatformat:2 }}
+                    {% else %}
+                        <em>Pendiente</em>
+                    {% endif %}
+                </td>
+                <td>{{ caja.estado|capfirst }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center">No hay registros de caja disponibles.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Paginación -->
+    <nav aria-label="Paginación">
+        <ul class="pagination justify-content-center">
+            {% if cajas.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ cajas.previous_page_number }}#historial-caja" aria-label="Anterior">&lsaquo;</a>
+            </li>
+            {% endif %}
+
+            <li class="page-item disabled"><span class="page-link">Página {{ cajas.number }} de {{ cajas.paginator.num_pages }}</span></li>
+
+            {% if cajas.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ cajas.next_page_number }}#historial-caja" aria-label="Siguiente">&rsaquo;</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+
+    <a href="{% url 'report_dashboard' %}" class="btn btn-secondary mt-3">Volver al Dashboard de Reportes</a>
+</div>
+{% endblock %}

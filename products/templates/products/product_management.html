@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2>Gestión de Productos</h2>
+
+    <!-- Barra de búsqueda -->
+    <form method="get" class="mb-3">
+        <input type="text" name="search" class="form-control" placeholder="Buscar productos por nombre..." value="{{ search_query }}">
+        <br><br>
+        <button type="submit" class="btn btn-primary mt-2">Buscar</button>
+    </form>
+
+    <!-- Tabla de productos -->
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID Producto</th>
+                <th>Nombre</th>
+                <th>Descripción</th>
+                <th>Cantidad</th>
+                <th>Precio de Compra</th>
+                <th>Precio de Venta</th>
+                <th>Código de Barras</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in products %}
+            <tr>
+                <td>{{ product.producto_id }}</td>
+                <td>{{ product.nombre }}</td>
+                <td>{{ product.descripcion }}</td>
+                <td>{{ product.cantidad }}</td>
+                <td>{{ product.precio_compra }}</td>
+                <td>{{ product.precio_venta }}</td>
+                <td>{{ product.codigo_barras }}</td>
+                <td>
+                    <a href="{% url 'edit_product' product.id %}" class="btn btn-warning">Editar</a>
+                    <form method="post" action="{% url 'delete_product' product.id %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">Eliminar</button>
+                    </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8" class="text-center">No hay productos registrados.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+
+    <!-- Paginación -->
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            {% if products.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1&search={{ search_query }}" aria-label="Primero">
+                    &laquo;
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ products.previous_page_number }}&search={{ search_query }}" aria-label="Anterior">
+                    &lsaquo;
+                </a>
+            </li>
+            {% endif %}
+
+            {% for page_num in products.paginator.page_range %}
+            <li class="page-item {% if page_num == products.number %}active{% endif %}">
+                <a class="page-link" href="?page={{ page_num }}&search={{ search_query }}">{{ page_num }}</a>
+            </li>
+            {% endfor %}
+
+            {% if products.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ products.next_page_number }}&search={{ search_query }}" aria-label="Siguiente">
+                    &rsaquo;
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ products.paginator.num_pages }}&search={{ search_query }}" aria-label="Último">
+                    &raquo;
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    <br><br>    
+    
+    <br><br>
+    <a href="{% url 'create_product' %}" class="btn"  data-tooltip="Agregar Producto">Agregar Producto</a>
+    <br><br>
+    <br>
+    <a href="{% url 'upload_products' %}" class="btn btn-success">Cargar Productos por Excel</a>
+    <br>
+    <br><br>
+    <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary">Volver</a>
+</div>
+{% endblock %}
