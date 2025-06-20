@@ -1,5 +1,3 @@
-// cashier/static/js/cashier.js
-
 document.addEventListener("DOMContentLoaded", () => {
     const cerrarCajaBtn = document.getElementById("close-cash-button");
     const confirmarCompraButton = document.getElementById("confirmar-compra");
@@ -10,9 +8,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const searchButton = document.getElementById("product-search-button");
     const searchInput = document.getElementById("product-search-input");
     const resultsList = document.getElementById("product-search-results");
-    const formaPagoButtons = document.querySelectorAll(".btn-group button");
-    const tipoVentaInput = document.getElementById("tipo_venta") || { value: "boleta" };
-    const formaPagoInput = document.getElementById("forma_pago") || { value: "" };
+
+    const tipoVentaInput = { value: "boleta" };
+    const formaPagoInput = document.getElementById("forma_pago");
+
+    const tipoVentaButtons = [document.getElementById("boleta"), document.getElementById("factura")];
+    const formaPagoButtons = [document.getElementById("efectivo"), document.getElementById("debito"), document.getElementById("credito")];
 
     let carrito = new Map();
     let totalCarrito = 0;
@@ -22,43 +23,39 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function showToast(message, type = "success") {
-        let toastContainer = document.getElementById("toast-container");
-        if (!toastContainer) {
-            toastContainer = document.createElement("div");
-            toastContainer.id = "toast-container";
-            toastContainer.style.position = "fixed";
-            toastContainer.style.top = "20px";
-            toastContainer.style.right = "20px";
-            toastContainer.style.zIndex = "1050";
-            document.body.appendChild(toastContainer);
-        }
+        const toastContainer = document.getElementById("toast-container") || (() => {
+            const tc = document.createElement("div");
+            tc.id = "toast-container";
+            tc.style.position = "fixed";
+            tc.style.top = "20px";
+            tc.style.right = "20px";
+            tc.style.zIndex = "1050";
+            document.body.appendChild(tc);
+            return tc;
+        })();
 
         const toastId = `toast-${Date.now()}`;
-        const toastHtml = `
+        toastContainer.innerHTML += `
             <div id="${toastId}" class="toast align-items-center text-white bg-${type} border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
                 <div class="d-flex">
-                    <div class="toast-body fs-6">
-                        ${message}
-                    </div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                    <div class="toast-body fs-6">${message}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
                 </div>
             </div>
         `;
-        toastContainer.innerHTML += toastHtml;
         const toastElement = document.getElementById(toastId);
-        const toastInstance = new bootstrap.Toast(toastElement, { delay: 4000 });
-        toastInstance.show();
+        new bootstrap.Toast(toastElement, { delay: 4000 }).show();
         setTimeout(() => toastElement.remove(), 4500);
     }
 
     function calcularVuelto() {
-        const cantidadPagada = parseFloat(cantidadPagadaInput.value) || 0;
-        const totalCarrito = parseFloat(totalPriceElement.textContent.replace("$", "")) || 0;
-        const vuelto = cantidadPagada - totalCarrito;
+        const pagado = parseFloat(cantidadPagadaInput.value) || 0;
+        const total = parseFloat(totalPriceElement.textContent.replace("$", "")) || 0;
+        const vuelto = pagado - total;
         vueltoElement.textContent = `$${vuelto.toFixed(2)}`;
     }
 
-    if (cantidadPagadaInput) cantidadPagadaInput.addEventListener("input", calcularVuelto);
+    cantidadPagadaInput.addEventListener("input", calcularVuelto);
 
     function debounce(func, delay = 300) {
         let timeout;
@@ -73,8 +70,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!query) return showToast("Ingresa un término de búsqueda.", "warning");
 
         try {
-            const response = await fetch(`/cashier/buscar-producto/?q=${query}`);
-            const data = await response.json();
+            const res = await fetch(`/cashier/buscar-producto/?q=${query}`);
+            const data = await res.json();
             resultsList.innerHTML = "";
 
             if (data.productos.length === 0) {
@@ -82,20 +79,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            data.productos.forEach(producto => {
+            data.productos.forEach(p => {
                 const li = document.createElement("li");
-                li.innerHTML = `${producto.nombre} - $${producto.precio_venta} 
+                li.innerHTML = `${p.nombre} - $${p.precio_venta} 
                     <button class="btn btn-success btn-sm ml-2" 
-                        data-id="${producto.id}" 
-                        data-nombre="${producto.nombre}" 
-                        data-precio="${producto.precio_venta}">+</button>`;
+                        data-id="${p.id}" data-nombre="${p.nombre}" data-precio="${p.precio_venta}">+</button>`;
                 resultsList.appendChild(li);
             });
-        } catch (error) {
-            console.error("Error al buscar productos:", error);
+        } catch {
             showToast("Error en la búsqueda.", "danger");
         }
-    }, 500));
+    }));
 
     resultsList.addEventListener("click", (e) => {
         if (e.target.tagName === "BUTTON") {
@@ -138,21 +132,50 @@ document.addEventListener("DOMContentLoaded", () => {
         const productoId = parseInt(e.target.dataset.id);
         if (!productoId) return;
 
-        if (e.target.dataset.action === "increment") {
-            carrito.get(productoId).cantidad++;
-        } else if (e.target.dataset.action === "decrement") {
-            carrito.get(productoId).cantidad--;
-            if (carrito.get(productoId).cantidad <= 0) carrito.delete(productoId);
+        const item = carrito.get(productoId);
+        if (e.target.dataset.action === "increment") item.cantidad++;
+        if (e.target.dataset.action === "decrement") {
+            item.cantidad--;
+            if (item.cantidad <= 0) carrito.delete(productoId);
         }
+
         actualizarCarrito();
+    });
+
+    tipoVentaButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+            tipoVentaButtons.forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            tipoVentaInput.value = btn.id;
+        });
+    });
+
+    formaPagoButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+            formaPagoButtons.forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+
+            formaPagoInput.value = btn.id;
+
+            if (btn.id === "debito" || btn.id === "credito") {
+                cantidadPagadaInput.value = totalCarrito.toFixed(2);
+            } else {
+                cantidadPagadaInput.value = "";
+            }
+
+            calcularVuelto();
+        });
     });
 
     confirmarCompraButton.addEventListener("click", async () => {
         if (!formaPagoInput.value) return showToast("Selecciona un método de pago", "danger");
         if (carrito.size === 0) return showToast("El carrito está vacío", "warning");
 
+        const confirmar = confirm("¿Deseas imprimir el comprobante?");
+        if (!confirmar) return;
+
         try {
-            const response = await fetch("/cashier/", {
+            const res = await fetch("/cashier/", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -166,54 +189,39 @@ document.addEventListener("DOMContentLoaded", () => {
                 })
             });
 
-            const data = await response.json();
-            if (!response.ok || !data.success) return showToast(data.error || "Error al confirmar", "danger");
+            const data = await res.json();
+            if (!res.ok || !data.success) return showToast(data.error || "Error al confirmar", "danger");
 
             showToast("Compra confirmada con éxito", "success");
             carrito.clear();
             actualizarCarrito();
 
-            if (data.reporte_url) {
-                window.open(data.reporte_url, "_blank");
-            }
+            if (data.reporte_url) window.open(data.reporte_url, "_blank");
         } catch (err) {
             console.error("Error al confirmar compra:", err);
             showToast("Error al procesar la compra", "danger");
         }
     });
 
-    formaPagoButtons.forEach(button => {
-        button.addEventListener("click", () => {
-            if (button.id === "debito" || button.id === "credito") {
-                cantidadPagadaInput.value = totalCarrito.toFixed(2);
-            } else {
-                cantidadPagadaInput.value = "";
-            }
-            calcularVuelto();
-        });
-    });
-
     if (cerrarCajaBtn) {
         cerrarCajaBtn.addEventListener("click", async () => {
             try {
-                const response = await fetch("/cashier/cerrar_caja/", {
+                const res = await fetch("/cashier/cerrar_caja/", {
                     method: "POST",
                     headers: {
                         "X-CSRFToken": getCSRFToken(),
                         "Content-Type": "application/json"
                     }
                 });
-
-                const data = await response.json();
+                const data = await res.json();
                 if (data.success && data.caja_id) {
                     showToast("Caja cerrada con éxito.", "success");
                     window.location.href = `/cashier/detalle-caja/${data.caja_id}/`;
                 } else {
                     showToast(data.error || "Error al cerrar la caja.", "danger");
                 }
-            } catch (error) {
-                console.error("Error al cerrar caja:", error);
-                showToast("Error al cerrar la caja.", "danger");
+            } catch (err) {
+                showToast("Error al cerrar la caja", "danger");
             }
         });
     }

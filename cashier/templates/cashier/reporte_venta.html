@@ -1,55 +1,45 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reporte de Venta</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-        }
-        .reporte {
-            width: 300px;
-            margin: 0 auto;
-            text-align: center;
-        }
-        .btn-imprimir {
-            margin-top: 20px;
-        }
-    </style>
-</head>
-<body>
-    <div class="reporte">
-        <h3>Reporte de Venta</h3>
-        <p><strong>ID Venta:</strong> {{ venta.id }}</p>
-        <p><strong>Fecha:</strong> {{ venta.fecha|date:"d/m/Y H:i" }}</p>
-        <p><strong>Empleado:</strong> {{ venta.empleado.username }}</p>
-        <p><strong>Forma de Pago:</strong> {{ venta.get_forma_pago_display }}</p>
-        <p><strong>Total:</strong> ${{ venta.total|floatformat:2 }}</p>
+{% extends 'base.html' %}
 
-        <h4>Detalles</h4>
-        <table style="width: 100%; text-align: left;">
-            <thead>
-                <tr>
-                    <th>Producto</th>
-                    <th>Cantidad</th>
-                    <th>Precio</th>
-                    <th>Subtotal</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for detalle in detalles %}
-                <tr>
-                    <td>{{ detalle.producto.nombre }}</td>
-                    <td>{{ detalle.cantidad }}</td>
-                    <td>${{ detalle.precio_unitario|floatformat:2 }}</td>
-                    <td>${{ detalle.subtotal|floatformat:2 }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-3">Detalle de Venta #{{ venta.id }}</h2>
 
-        <button class="btn-imprimir" onclick="window.print()">Imprimir</button>
+    <p><strong>Fecha:</strong> {{ venta.fecha|date:"d M Y, H:i" }}</p>
+    <p><strong>Empleado:</strong> {{ venta.empleado.username }}</p>
+    <p><strong>Tipo de Venta:</strong> {{ venta.get_tipo_venta_display }}</p>
+    <p><strong>Forma de Pago:</strong> {{ venta.get_forma_pago_display }}</p>
+    <p><strong>Total:</strong> ${{ venta.total|floatformat:2 }}</p>
+
+    {% if venta.forma_pago == "efectivo" %}
+        <p><strong>Cliente Pagó:</strong> ${{ venta.cliente_paga|default:"0.00"|floatformat:2 }}</p>
+        <p><strong>Vuelto Entregado:</strong> ${{ venta.vuelto_entregado|default:"0.00"|floatformat:2 }}</p>
+    {% endif %}
+
+    <h4 class="mt-4">Productos Vendidos:</h4>
+    <table class="table table-bordered table-sm">
+        <thead class="table-light">
+            <tr>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Precio Unitario</th>
+                <th>Subtotal</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in detalles %}
+            <tr>
+                <td>{{ item.producto.nombre }}</td>
+                <td>{{ item.cantidad }}</td>
+                <td>${{ item.precio_unitario|floatformat:2 }}</td>
+                <td>${{ item.subtotal|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="mt-4 d-flex gap-2">
+        <button onclick="window.print()" class="btn btn-primary">Imprimir Detalle</button>
+        <a href="{% url 'cashier_dashboard' %}" class="btn btn-secondary">Volver</a>
     </div>
-</body>
-</html>
+</div>
+{% endblock %}

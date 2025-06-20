@@ -102,22 +102,21 @@ def download_template(request):
 
 # products/views.py
 def create_or_edit_product(request, product_id=None):
-    if product_id:
-        product = get_object_or_404(Product, id=product_id)
-        form = ProductForm(request.POST or None, instance=product)
-        title = 'Editar Producto'
-    else:
-        product = None
-        form = ProductForm(request.POST or None)
-        title = 'Crear Producto'
+    product = get_object_or_404(Product, id=product_id) if product_id else None
+    form = ProductForm(request.POST or None, instance=product)
+    title = 'Editar Producto' if product_id else 'Crear Producto'
 
-    if request.method == 'POST':
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Los cambios se guardaron con éxito.')
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        messages.success(request, 'Los cambios se guardaron con éxito.')
+        if 'save_and_list' in request.POST:
             return redirect('product_management')
-    
-    return render(request, 'products/product_form.html', {'form': form, 'title': title, 'product': product})
+        return redirect('edit_product', product.id if product else form.instance.id)
+
+    return render(request, 'products/product_form.html', {
+        'form': form, 'title': title, 'product': product
+    })
+
 
 
 

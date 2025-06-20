@@ -1,3 +1,4 @@
+#views.py del cashier
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
@@ -7,6 +8,7 @@ from django.contrib import messages
 from django.utils import timezone
 from django.db.models import Q
 import json
+from decimal import Decimal
 
 from .models import Venta, VentaDetalle, AperturaCierreCaja
 from products.models import Product
@@ -36,8 +38,10 @@ def abrir_caja(request):
     return render(request, 'cashier/abrir_caja.html')
 
 
+
 # 📌 DASHBOARD DEL CAJERO
-# 📌 DASHBOARD DEL CAJERO
+
+
 @transaction.atomic
 @login_required
 def cashier_dashboard(request):
@@ -60,33 +64,38 @@ def cashier_dashboard(request):
             carrito = data.get('carrito', [])
             tipo_venta = data.get('tipo_venta', 'boleta')
             forma_pago = data.get('forma_pago', 'efectivo')
-            cliente_paga = float(data.get('cliente_paga', 0))
+            cliente_paga = Decimal(str(data.get('cliente_paga', '0')))
 
             if not carrito:
                 return JsonResponse({"error": "El carrito está vacío."}, status=400)
+
+            total = Decimal('0.00')
+            for item in carrito:
+                producto = get_object_or_404(Product, id=item.get('producto_id'))
+                cantidad = int(item.get('cantidad', 1))
+                total += cantidad * producto.precio_venta
+
+            # ⚠️ Verificación de pago insuficiente solo para efectivo
+            if forma_pago == 'efectivo' and cliente_paga < total:
+                return JsonResponse({
+                    "error": f"Pago insuficiente. El total es ${total}, pero el cliente pagó ${cliente_paga}."
+                }, status=400)
 
             with transaction.atomic():
                 venta = Venta.objects.create(
                     empleado=request.user,
                     tipo_venta=tipo_venta,
                     forma_pago=forma_pago,
-                    total=0
+                    total=Decimal('0.00'),
+                    vuelto_entregado=Decimal('0.00')
                 )
 
-                total = 0
                 for item in carrito:
-                    producto_id = item.get('producto_id')
-                    if not producto_id:
-                        return JsonResponse({"error": "Falta el producto_id en el carrito."}, status=400)
-
-                    producto = get_object_or_404(Product, id=producto_id)
+                    producto = get_object_or_404(Product, id=item.get('producto_id'))
                     cantidad = int(item.get('cantidad', 1))
 
                     if not producto.permitir_venta_sin_stock and producto.stock < cantidad:
-                        return JsonResponse(
-                            {"error": f"El producto '{producto.nombre}' no tiene suficiente stock."},
-                            status=400
-                        )
+                        return JsonResponse({"error": f"El producto '{producto.nombre}' no tiene suficiente stock."}, status=400)
 
                     producto.stock -= cantidad
                     producto.save()
@@ -98,9 +107,10 @@ def cashier_dashboard(request):
                         precio_unitario=producto.precio_venta
                     )
 
-                    total += cantidad * producto.precio_venta
-
                 venta.total = total
+                if forma_pago == "efectivo":
+                    venta.vuelto_entregado = max(Decimal('0.00'), cliente_paga - total)
+
                 venta.save()
 
             reporte_url = reverse('reporte_venta', args=[venta.id])
@@ -116,6 +126,8 @@ def cashier_dashboard(request):
             return JsonResponse({"error": str(e)}, status=500)
 
     return JsonResponse({"error": "Método no permitido."}, status=405)
+
+
 
 
 

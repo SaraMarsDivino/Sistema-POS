@@ -8,6 +8,7 @@ class Venta(models.Model):
     empleado = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     fecha = models.DateTimeField(auto_now_add=True)
     total = models.DecimalField(max_digits=10, decimal_places=2)
+
     tipo_venta = models.CharField(
         max_length=20,
         choices=[('boleta', 'Boleta Electrónica'), ('factura', 'Factura Electrónica')],
@@ -18,10 +19,13 @@ class Venta(models.Model):
         choices=[('efectivo', 'Efectivo'), ('debito', 'Tarjeta de Débito'), ('credito', 'Tarjeta de Crédito')],
         default='efectivo'
     )
-    vuelto_entregado = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)  # Nuevo campo
+
+    cliente_paga = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)  # 💵 Nuevo campo
+    vuelto_entregado = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
     def __str__(self):
         return f"Venta #{self.id} - Total: ${self.total}"
+
 
 
 class VentaDetalle(models.Model):

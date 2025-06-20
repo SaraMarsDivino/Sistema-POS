@@ -12,25 +12,19 @@
         <h2>Bienvenido, {{ user.username }}</h2>
         <h3>Modo Cajero</h3>
     </div>
-    
-    <!-- Toasts para mostrar mensajes -->
+
     <div id="toast-container" class="position-fixed top-0 end-0 p-3" style="z-index: 1050; width: 350px;">
         {% for message in mensajes %}
-            <div class="toast align-items-center text-white bg-{% if message.tags == 'error' %}danger{% else %}success{% endif %} border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast align-items-center text-white bg-{% if message.tags == 'error' %}danger{% else %}success{% endif %} border-0 show" role="alert">
                 <div class="d-flex">
-                    <div class="toast-body fs-5">
-                        {{ message }}
-                    </div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                    <div class="toast-body fs-5">{{ message }}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
                 </div>
             </div>
         {% endfor %}
     </div>
-    
-    
 
     <div class="row">
-        <!-- Columna de búsqueda de productos -->
         <div class="col-md-4">
             <div class="card p-3">
                 <h4>Buscar productos</h4>
@@ -42,34 +36,29 @@
             </div>
         </div>
 
-        <!-- Columna de carrito de compras -->
         <div class="col-md-4">
             <div class="card p-3">
                 <h4>Carrito de Compras</h4>
                 <input type="text" id="barcode-input" class="form-control mb-2" placeholder="Código de barras">
                 <table class="table table-dark">
                     <thead>
-                        <tr>
-                            <th>Cant.</th>
-                            <th>Producto</th>
-                            <th>Total</th>
-                            <th>Acción</th>
-                        </tr>
+                        <tr><th>Cant.</th><th>Producto</th><th>Total</th><th>Acción</th></tr>
                     </thead>
                     <tbody id="cart-items">
-                        <tr>
-                            <td colspan="4" class="text-center">No hay productos en el carrito.</td>
-                        </tr>
+                        <tr><td colspan="4" class="text-center">No hay productos en el carrito.</td></tr>
                     </tbody>
                 </table>
                 <p class="lead">Total: $<span id="total-price">0.00</span></p>
             </div>
         </div>
 
-        <!-- Columna de opciones de pago -->
         <div class="col-md-4">
             <div class="card p-3">
                 <h4>Opciones de Pago</h4>
+
+                <input type="hidden" id="tipo_venta" value="boleta">
+                <input type="hidden" id="forma_pago" value="">
+
                 <div class="mb-3">
                     <label class="form-label">Tipo de Venta</label>
                     <div class="btn-group w-100">
@@ -101,12 +90,10 @@
         </div>
     </div>
 
-    <!-- Botón para cerrar caja -->
     <div class="text-center mt-4">
         <button type="button" id="close-cash-button" class="btn btn-danger">Cerrar Caja</button>
     </div>
 
-    <!-- Botón para volver al panel de administración -->
     <div class="text-center mt-4">
         <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary">Volver</a>
     </div>
